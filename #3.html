@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuyWise - Spending Companion</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header { background: #007bff; color: white; text-align: center; padding: 2em; }
+    .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+    #social-feed { margin-top: 20px; }
+    .post { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    button { padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    textarea { width: 100%; height: 80px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BuyWise - Spending Companion</h1>
+    <p>Your partner in avoiding impulse purchases!</p>
+    <a href="https://chrome.google.com/webstore/detail" target="_blank">
+      <button>Download the Extension</button>
+    </a>
+  </header>
+  <div class="container">
+    <h2>Why Use BuyWise?</h2>
+    <p>Our browser extension pops up before you check out on sites like Amazon, Sephora, and Ulta, asking if you really need that purchase. Save money and shop smarter!</p>
+    
+    <h2>Share Your Wins</h2>
+    <div id="auth-section">
+      <button id="login-btn">Log In with Google</button>
+      <button id="logout-btn" style="display: none;">Log Out</button>
+    </div>
+    <div id="post-section" style="display: none;">
+      <textarea id="post-content" placeholder="Share your impulse-buy win!"></textarea>
+      <button id="submit-post">Post</button>
+    </div>
+    <div id="social-feed"></div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC76_xk-Ws-LNpuebytBPF-P2jnacE1eDA",
+      authDomain: "wisebuy-c2d14.firebaseapp.com",
+      projectId: "wisebuy-c2d14",
+      storageBucket: "wisebuy-c2d14.firebasestorage.app",
+      messagingSenderId: "929949275289",
+      appId: "1:929949275289:web:d47b61afa8ff38f34e9408"
+    };
+
+    try {
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      console.log('Firebase initialized successfully');
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // DOM elements
+      const loginBtn = document.getElementById('login-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+      const postSection = document.getElementById('post-section');
+      const socialFeed = document.getElementById('social-feed');
+
+      // Auth handling
+      onAuthStateChanged(auth, user => {
+        console.log('Auth state changed:', user ? user.displayName : 'No user');
+        if (user) {
+          loginBtn.style.display = 'none';
+          logoutBtn.style.display = 'block';
+          postSection.style.display = 'block';
+          loadPosts();
+        } else {
+          loginBtn.style.display = 'block';
+          logoutBtn.style.display = 'none';
+          postSection.style.display = 'none';
+          socialFeed.innerHTML = '<p>Log in to see the community feed!</p>';
+        }
+      });
+
+      loginBtn.addEventListener('click', async () => {
+        try {
+          await signInWithPopup(auth, new GoogleAuthProvider());
+          console.log('User signed in');
+        } catch (error) {
+          console.error('Login error:', error.message);
+          alert('Error logging in: ' + error.message);
+        }
+      });
+
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await signOut(auth);
+          console.log('User signed out');
+        } catch (error) {
+          console.error('Logout error:', error.message);
+          alert('Error logging out: ' + error.message);
+        }
+      });
+
+      // Submit post
+      document.getElementById('submit-post').addEventListener('click', async () => {
+        const content = document.getElementById('post-content').value;
+        if (content) {
+          try {
+            await addDoc(collection(db, 'posts'), {
+              userId: auth.currentUser.uid,
+              username: auth.currentUser.displayName,
+              content: content,
+              timestamp: new Date()
+            });
+            console.log('Post added');
+            document.getElementById('post-content').value = '';
+            loadPosts();
+          } catch (error) {
+            console.error('Error posting:', error.message);
+            alert('Error posting: ' + error.message);
+          }
+        }
+      });
+
+      // Load posts
+      async function loadPosts() {
+        try {
+          const q = query(collection(db, 'posts'), orderBy('timestamp', 'desc'), limit(20));
+          const snapshot = await getDocs(q);
+          socialFeed.innerHTML = '';
+          snapshot.forEach(doc => {
+            const post = doc.data();
+            const postElement = document.createElement('div');
+            postElement.className = 'post';
+            postElement.innerHTML = `
+              <p><strong>${post.username}</strong>: ${post.content}</p>
+              <p><small>${post.timestamp ? new Date(post.timestamp).toLocaleString() : 'Just now'}</small></p>
+            `;
+            socialFeed.appendChild(postElement);
+          });
+          console.log('Posts loaded:', snapshot.size);
+        } catch (error) {
+          console.error('Error loading posts:', error.message);
+          socialFeed.innerHTML = '<p>Error loading posts. Please try again.</p>';
+        }
+      }
+    } catch (error) {
+      console.error('Firebase initialization error:', error.message);
+      alert('Failed to initialize app: ' + error.message);
+    }
+  </script>
+</body>
+</html>
