@@ -90,8 +90,14 @@ function showMobilePopup() {
   popup.innerHTML = `
     <h3 style="margin: 0 0 10px; font-size: 16px;">BuyWise</h3>
     <p style="margin: 0 0 10px;">Do you really need these ${itemCategory}?</p>
-    <label style="display: block; margin-bottom: 5px;" for="necessity">How necessary? (1 = Not needed, 5 = Essential)</label>
-    <input type="range" id="necessity" min="1" max="5" value="3" style="width: 100%;">
+    <label style="display: block; margin-bottom: 5px;">How necessary? (1 = Not needed, 5 = Essential)</label>
+    <div id="necessityButtons" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+      <button id="necessity1" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">1</button>
+      <button id="necessity2" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">2</button>
+      <button id="necessity3" style="padding: 5px 10px; background: #60a5fa; color: #fff; border: 1px solid #ccc; cursor: pointer;">3</button>
+      <button id="necessity4" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">4</button>
+      <button id="necessity5" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">5</button>
+    </div>
     <div id="necessityValue" style="text-align: center; margin-bottom: 10px;">3</div>
     <button id="checkPurchase" style="padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer;">Check</button>
     <button id="fullCheck" style="margin-left: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer;">Full Check</button>
@@ -101,24 +107,37 @@ function showMobilePopup() {
   document.body.appendChild(popup);
   console.log('Mobile: Popup added with category:', itemCategory);
 
-  const necessityInput = document.getElementById('necessity');
+  let selectedNecessity = 3; // Default value
   const necessityValue = document.getElementById('necessityValue');
   const checkButton = document.getElementById('checkPurchase');
   const fullCheckButton = document.getElementById('fullCheck');
   const closeButton = document.getElementById('closePopup');
 
-  if (!necessityInput || !necessityValue || !checkButton || !fullCheckButton || !closeButton) {
+  // Add click handlers for necessity buttons
+  for (let i = 1; i <= 5; i++) {
+    const button = document.getElementById(`necessity${i}`);
+    button.addEventListener('click', () => {
+      selectedNecessity = i;
+      necessityValue.textContent = i;
+      // Reset all buttons to default style
+      for (let j = 1; j <= 5; j++) {
+        document.getElementById(`necessity${j}`).style.background = '#e5e7eb';
+        document.getElementById(`necessity${j}`).style.color = '#000';
+      }
+      // Highlight selected button
+      button.style.background = '#60a5fa';
+      button.style.color = '#fff';
+      console.log('Mobile: Necessity selected:', i);
+    });
+  }
+
+  if (!necessityValue || !checkButton || !fullCheckButton || !closeButton) {
     console.error('Mobile: Popup elements missing');
     return;
   }
 
-  necessityInput.addEventListener('input', () => {
-    necessityValue.textContent = necessityInput.value;
-    console.log('Mobile: Necessity updated:', necessityInput.value);
-  });
-
   checkButton.addEventListener('click', () => {
-    const necessity = parseInt(necessityInput.value);
+    const necessity = selectedNecessity;
     let recommendation = '';
     if (necessity <= 2) {
       recommendation = `You probably don’t need these ${itemCategory}. Save your money!`;
@@ -139,7 +158,8 @@ function showMobilePopup() {
 
   closeButton.addEventListener('click', () => {
     popup.remove();
-    console.log('Mobile: Close button clicked');
+    window.history.back();
+    console.log('Mobile: Close button clicked, navigating back');
   });
 }
 
