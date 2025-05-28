@@ -102,22 +102,25 @@ function showMobilePopup() {
   popup.style.maxWidth = '90%';
   popup.style.fontSize = '14px';
   popup.innerHTML = `
-    <h3 style="margin: 0 0 10px; font-size: 16px;">BuyWise</h3>
-    <p style="margin: 0 0 10px;">Do you really need these ${itemCategory}?</p>
-    <p style="margin: 0 0 10px;">This month: $${monthlySavings} saved</p>
-    <label style="display: block; margin-bottom: 5px;">How necessary? (1 = Not needed, 5 = Essential)</label>
-    <div id="necessityButtons" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-      <button id="necessity1" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">1</button>
-      <button id="necessity2" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">2</button>
-      <button id="necessity3" style="padding: 5px 10px; background: #60a5fa; color: #fff; border: 1px solid #ccc; cursor: pointer;">3</button>
-      <button id="necessity4" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">4</button>
-      <button id="necessity5" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">5</button>
+    <div style="position: relative;">
+      <button id="exitPopup" style="position: absolute; top: -10px; right: -10px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px; line-height: 20px; text-align: center;">X</button>
+      <h3 style="margin: 0 0 10px; font-size: 16px;">BuyWise</h3>
+      <p style="margin: 0 0 10px;">Do you really need these ${itemCategory}?</p>
+      <p style="margin: 0 0 10px;">This month: $${monthlySavings} saved</p>
+      <label style="display: block; margin-bottom: 5px;" for="necessity">How necessary? (1 = Not needed, 5 = Essential)</label>
+      <div id="necessityButtons" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+        <button id="necessity1" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">1</button>
+        <button id="necessity2" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">2</button>
+        <button id="necessity3" style="padding: 5px 10px; background: #60a5fa; color: #fff; border: 1px solid #ccc; cursor: pointer;">3</button>
+        <button id="necessity4" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">4</button>
+        <button id="necessity5" style="padding: 5px 10px; background: #e5e7eb; color: #000; border: 1px solid #ccc; cursor: pointer;">5</button>
+      </div>
+      <div id="necessityValue" style="text-align: center; margin-bottom: 10px;">3</div>
+      <button id="checkPurchase" style="padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer;">Check</button>
+      <button id="fullCheck" style="margin-left: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer;">Full Check</button>
+      <button id="closePopup" style="margin-left: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer;">No, I'm good</button>
+      <p id="recommendation" style="margin-top: 10px; font-weight: bold;"></p>
     </div>
-    <div id="necessityValue" style="text-align: center; margin-bottom: 10px;">3</div>
-    <button id="checkPurchase" style="padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer;">Check</button>
-    <button id="fullCheck" style="margin-left: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer;">Full Check</button>
-    <button id="closePopup" style="margin-left: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer;">No, I'm good</button>
-    <p id="recommendation" style="margin-top: 10px; font-weight: bold;"></p>
   `;
   document.body.appendChild(popup);
   console.log('Mobile: Popup added with category:', itemCategory);
@@ -127,8 +130,9 @@ function showMobilePopup() {
   const checkButton = document.getElementById('checkPurchase');
   const fullCheckButton = document.getElementById('fullCheck');
   const closeButton = document.getElementById('closePopup');
+  const exitButton = document.getElementById('exitPopup');
 
-  if (!necessityValue || !checkButton || !fullCheckButton || !closeButton) {
+  if (!necessityValue || !checkButton || !fullCheckButton || !closeButton || !exitButton) {
     console.error('Mobile: Popup elements missing');
     return;
   }
@@ -180,6 +184,11 @@ function showMobilePopup() {
     popup.remove();
     window.history.back();
     console.log('Mobile: Close button clicked, navigating back');
+  });
+
+  exitButton.addEventListener('click', () => {
+    popup.remove();
+    console.log('Mobile: Exit button clicked, popup closed');
   });
 }
 
