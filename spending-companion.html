@@ -3,26 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BuyWise - Spending Companion Extension</title>
+  <title>PurchasePause Chrome Extension</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    header { background: #007bff; color: white; text-align: center; padding: 2em; }
-    .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-    button { padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
-    button:hover { background: #0056b3; }
+    body, button, p, h1, h2 {
+      font-family: 'Montserrat', sans-serif;
+    }
   </style>
 </head>
-<body>
-  <header>
-    <h1>BuyWise - Spending Companion Extension</h1>
-    <p>Your partner in avoiding impulse purchases!</p>
-    <p><strong>Coming Soon!</strong> The BuyWise Chrome Extension will pop up on shopping sites to help you decide if you really need that purchase. Stay tuned!</p>
-    <br><br>
-    <a href="./index.html"><button>Back to Item Input</button></a>
-  </header>
-  <div class="container">
-    <h2>Why Use BuyWise?</h2>
-    <p>Our browser extension will pop up before you check out on sites like Amazon, Sephora, and Ulta, asking if you really need that purchase. Save money and shop smarter!</p>
+<body class="bg-gray-50 flex flex-col items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md text-center">
+    <h1 class="text-2xl font-bold text-blue-800 mb-4">PurchasePause Chrome Extension</h1>
+    <p class="text-gray-600 mb-4">Coming Soon!</p>
+    <p class="text-gray-600 mb-6">Our Chrome extension will help you pause and think before making impulse purchases. Stay tuned for updates!</p>
+    <a href="./index.html">
+      <button class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">Back to Item Input</button>
+    </a>
   </div>
 </body>
 </html>
