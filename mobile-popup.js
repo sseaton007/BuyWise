@@ -175,7 +175,7 @@ function showMobilePopup() {
   });
 
   fullCheckButton.addEventListener('click', () => {
-    window.open('https://sseaton007.github.io/BuyWise/', '_blank');
+    window.open('https://sseaton007.github.io/PurchasePause/', '_blank');
     popup.remove();
     console.log('Mobile: Full Check button clicked');
   });
