@@ -70,7 +70,7 @@ function getItemDetails() {
 }
 
 function getMonthlySavings() {
-  const savings = JSON.parse(localStorage.getItem('buyWiseItems')) || [];
+  const savings = JSON.parse(localStorage.getItem('purchasePauseItems')) || [];
   const now = new Date();
   const currentMonthYear = now.toLocaleString('default', { month: 'long', year: 'numeric' });
   const monthlyTotal = savings
@@ -83,13 +83,13 @@ function getMonthlySavings() {
 }
 
 function showMobilePopup() {
-  const existingPopup = document.getElementById('buywise-mobile-popup');
+  const existingPopup = document.getElementById('purchasepause-mobile-popup');
   if (existingPopup) existingPopup.remove();
 
   const itemCategory = getItemDetails();
   const monthlySavings = getMonthlySavings();
   const popup = document.createElement('div');
-  popup.id = 'buywise-mobile-popup';
+  popup.id = 'purchasepause-mobile-popup';
   popup.style.position = 'fixed';
   popup.style.top = '10px';
   popup.style.right = '10px';
@@ -98,13 +98,13 @@ function showMobilePopup() {
   popup.style.padding = '15px';
   popup.style.zIndex = '10000';
   popup.style.boxShadow = '0 0 10px rgba(0,0,0,0.2)';
-  popup.style.fontFamily = 'Arial, sans-serif';
+  popup.style.fontFamily = 'Montserrat, Arial, sans-serif';
   popup.style.maxWidth = '90%';
   popup.style.fontSize = '14px';
   popup.innerHTML = `
     <div style="position: relative;">
       <button id="exitPopup" style="position: absolute; top: -10px; right: -10px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px; line-height: 20px; text-align: center;">X</button>
-      <h3 style="margin: 0 0 10px; font-size: 16px;">BuyWise</h3>
+      <h3 style="margin: 0 0 10px; font-size: 16px;">PurchasePause</h3>
       <p style="margin: 0 0 10px;">Do you really need these ${itemCategory}?</p>
       <p style="margin: 0 0 10px;">This month: $${monthlySavings} saved</p>
       <label style="display: block; margin-bottom: 5px;" for="necessity">How necessary? (1 = Not needed, 5 = Essential)</label>
@@ -162,9 +162,9 @@ function showMobilePopup() {
       recommendation = `You probably don’t need these ${itemCategory}. Save your money!`;
       // Save estimated cost
       const estimatedCost = 50; // Placeholder
-      const savings = JSON.parse(localStorage.getItem('buyWiseItems')) || [];
+      const savings = JSON.parse(localStorage.getItem('purchasePauseItems')) || [];
       savings.push({ cost: estimatedCost, timestamp: new Date().toISOString() });
-      localStorage.setItem('buyWiseItems', JSON.stringify(savings));
+      localStorage.setItem('purchasePauseItems', JSON.stringify(savings));
     } else if (necessity === 3) {
       recommendation = `Think it over. Do you have similar ${itemCategory}?`;
     } else {
