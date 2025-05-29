@@ -17,13 +17,35 @@
     <h1 class="text-2xl font-bold text-blue-800 mb-4">PurchasePause Mobile Setup</h1>
     <p class="text-gray-600 mb-4">Use PurchasePause on your mobile device to avoid impulse buys while shopping!</p>
     <p class="text-gray-600 mb-4">To set up, bookmark this page and replace the URL with the code below. Tap the bookmark on any checkout page to see the PurchasePause pop-up.</p>
-    <code class="block bg-gray-100 p-3 rounded-lg text-sm text-gray-800 mb-4 overflow-x-auto">
-      javascript:(function(){var s=document.createElement('script');s.src='https://sseaton007.github.io/PurchasePause/mobile-popup.js';document.body.appendChild(s);})();
-    </code>
+    <div class="relative">
+      <code id="bookmarkletCode" class="block bg-gray-100 p-3 rounded-lg text-sm text-gray-800 mb-4 overflow-x-auto">
+        javascript:(function(){var s=document.createElement('script');s.src='https://sseaton007.github.io/PurchasePause/mobile-popup.js';document.body.appendChild(s);})();
+      </code>
+      <button id="copyButton" class="absolute top-2 right-2 bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition text-sm">Copy Code</button>
+      <span id="copyFeedback" class="absolute top-2 right-16 text-green-600 text-sm hidden">Copied!</span>
+    </div>
     <p class="text-gray-600 mb-6">Shop in your mobile browser (e.g., Safari, Chrome) instead of retailer apps for the best experience.</p>
     <a href="./index.html">
       <button class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">Back to Item Input</button>
     </a>
   </div>
+
+  <script>
+    const copyButton = document.getElementById('copyButton');
+    const copyFeedback = document.getElementById('copyFeedback');
+    const bookmarkletCode = document.getElementById('bookmarkletCode').textContent.trim();
+
+    copyButton.addEventListener('click', () => {
+      navigator.clipboard.writeText(bookmarkletCode).then(() => {
+        copyFeedback.classList.remove('hidden');
+        setTimeout(() => {
+          copyFeedback.classList.add('hidden');
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy code. Please select and copy manually.');
+      });
+    });
+  </script>
 </body>
 </html>
