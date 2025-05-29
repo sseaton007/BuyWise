@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PurchasePause - Save Money on Impulse Buys</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body, button, input, textarea, label, p, h1, h2, h3 {
+      font-family: 'Montserrat', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 flex flex-col items-center justify-start min-h-screen py-8">
+  <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-lg">
+    <h1 class="text-3xl font-bold text-center text-blue-800 mb-4">PurchasePause</h1>
+    <p class="text-center text-gray-600 mb-4">Pause and think: Do you really need that purchase?</p>
+    <p id="savingsDisplay" class="text-center text-green-600 font-semibold mb-4"></p>
+    
+    <form id="buyForm" class="space-y-5" onsubmit="handleSubmit(event)">
+      <div>
+        <label for="item" class="block text-sm font-medium text-gray-700">What’s the item?</label>
+        <input type="text" id="item" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., New workout bottoms" required>
+      </div>
+      <div>
+        <label for="cost" class="block text-sm font-medium text-gray-700">Cost ($)</label>
+        <input type="number" id="cost" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 45" required min="0" step="0.01">
+      </div>
+      <div>
+        <label for="reason" class="block text-sm font-medium text-gray-700">Why do you want it?</label>
+        <textarea id="reason" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Love the new color" required></textarea>
+      </div>
+      <div>
+        <label for="necessity" class="block text-sm font-medium text-gray-700">How necessary is it? (1 = Not needed, 5 = Essential)</label>
+        <input type="range" id="necessity" class="mt-1 w-full" min="1" max="5" value="3">
+        <div class="text-sm text-gray-500 text-center" id="necessityValue">3</div>
+      </div>
+      <div>
+        <label for="similarItems" class="block text-sm font-medium text-gray-700">How many similar items do you own?</label>
+        <input type="number" id="similarItems" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 8" required min="0">
+      </div>
+      <p class="text-xs text-gray-500">By submitting, you agree to share your inputs with PurchasePause for analysis to improve the tool.</p>
+      <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">Should I Buy It?</button>
+    </form>
+    
+    <div class="mt-6 space-y-4 text-center">
+      <a href="./spending-companion.html">
+        <button class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">Get the Chrome Extension</button>
+      </a>
+      <a href="./mobile-companion.html">
+        <button class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">Add This to Your Mobile Device</button>
+      </a>
+    </div>
+    
+    <div id="result" class="mt-6 hidden">
+      <h2 class="text-xl font-semibold text-center text-gray-800">Your PurchasePause Advice</h2>
+      <p id="recommendation" class="text-center text-gray-700 mt-3"></p>
+      <div class="mt-5">
+        <h3 class="text-md font-medium text-gray-700">Smart Saving Tips</h3>
+        <ul id="tips" class="list-disc list-inside text-gray-600 mt-2"></ul>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <h2 class="text-xl font-semibold text-center text-gray-800">Savings Dashboard</h2>
+      <p class="text-center text-gray-600 mt-2">See how much you've saved each month by avoiding impulse purchases!</p>
+      <div id="monthlySavings" class="mt-4 text-center text-gray-700"></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('buyForm');
+    const resultDiv = document.getElementById('result');
+    const recommendationP = document.getElementById('recommendation');
+    const tipsUl = document.getElementById('tips');
+    const necessityInput = document.getElementById('necessity');
+    const necessityValue = document.getElementById('necessityValue');
+    const savingsDisplay = document.getElementById('savingsDisplay');
+    const monthlySavingsDiv = document.getElementById('monthlySavings');
+    const itemInput = document.getElementById('item');
+    const costInput = document.getElementById('cost');
+
+    // Load and display savings
+    function updateSavingsDisplay() {
+      const savings = JSON.parse(localStorage.getItem('purchasePauseItems')) || [];
+      const totalSavings = savings.reduce((sum, entry) => sum + entry.cost, 0);
+      savingsDisplay.textContent = totalSavings > 0 ? `You've saved $${totalSavings.toFixed(2)} so far!` : '';
+
+      // Calculate and display monthly savings
+      const monthlyTotals = {};
+      savings.forEach(entry => {
+        const date = new Date(entry.timestamp);
+        const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        monthlyTotals[monthYear] = (monthlyTotals[monthYear] || 0) + entry.cost;
+      });
+
+      let monthlyHtml = '';
+      for (const [monthYear, total] of Object.entries(monthlyTotals)) {
+        monthlyHtml += `<p>${monthYear}: $${total.toFixed(2)} saved</p>`;
+      }
+      monthlySavingsDiv.innerHTML = monthlyHtml || '<p>No savings recorded yet.</p>';
+    }
+    updateSavingsDisplay();
+
+    // Populate form fields from URL parameters
+    window.addEventListener('load', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const item = urlParams.get('item');
+      const price = urlParams.get('price');
+      if (item) {
+        itemInput.value = decodeURIComponent(item);
+      }
+      if (price && !isNaN(parseFloat(price))) {
+        costInput.value = parseFloat(price).toFixed(2);
+      }
+    });
+
+    // Update necessity value display
+    necessityInput.addEventListener('input', () => {
+      necessityValue.textContent = necessityInput.value;
+    });
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const item = document.getElementById('item').value;
+      const cost = parseFloat(document.getElementById('cost').value);
+      const necessity = parseInt(necessityInput.value);
+      const similarItems = parseInt(document.getElementById('similarItems').value);
+
+      // Decision logic
+      let score = 0;
+      if (necessity <= 2) score -= 3;
+      if (necessity >= 4) score += 2;
+      if (cost > 30) score -= 1;
+      if (similarItems > 3) score -= 2;
+      if (similarItems === 0) score += 1;
+
+      let recommendation = '';
+      if (score <= -2) {
+        recommendation = `Don’t buy ${item}! You already have ${similarItems} similar items, and it’s not essential. Save $${cost}!`;
+        // Save to localStorage
+        const savings = JSON.parse(localStorage.getItem('purchasePauseItems')) || [];
+        savings.push({ cost, timestamp: new Date().toISOString() });
+        localStorage.setItem('purchasePauseItems', JSON.stringify(savings));
+        updateSavingsDisplay();
+      } else if (score <= 0) {
+        recommendation = `Hold off on ${item}. With ${similarItems} similar items, maybe shop your closet or wait for a sale.`;
+      } else {
+        recommendation = `${item} seems like a reasonable buy, but search for discounts first to save on the $${cost} price.`;
+      }
+
+      // Select 3 random tips
+      const tips = [
+        'Sleep on it for a day to confirm you really want it.',
+        'Search for coupon codes on sites like Honey or RetailMeNot.',
+        'Check thrift stores or apps like Depop for similar items.',
+        'Ask: Will this item still matter to me in a month?',
+        'Allocate a small “fun” budget to avoid overspending.',
+        'Use cashback apps like Rakuten for online purchases.',
+        'Compare prices on Google Shopping before buying.'
+      ];
+      const selectedTips = tips.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+      // Show results
+      recommendationP.textContent = recommendation;
+      tipsUl.innerHTML = selectedTips.map(tip => `<li>${tip}</li>`).join('');
+      resultDiv.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
